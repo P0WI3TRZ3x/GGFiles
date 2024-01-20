@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GGFiles</title>
+ <style>
+    body {
+      background-color: black;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    #fileInput {
+	 background: linear-gradient(to top right, #0074cc, #4CAF50);
+      width: 49%;
+      height: 200px;
+      padding: 10px;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 70px;
+    }
+
+    #uploadButton, #viewListButton {
+	  background: linear-gradient(to top right, #0074cc, #4CAF50);
+      width: 400px;
+      height: 400px;
+      padding: 10px;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-right: 80px;
+	  margin-left: 80px;
+	  margin-bottom: 50px;
+    }
+
+    #progressBar {
+      width: 50%;
+      height: 20px;
+      background-color: #121212;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    #progress {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(to right, #0074cc, #4CAF50);
+      border-radius: 10px;
+    }
+	
+	    #centeredImage {
+      width: 50%;
+      height: auto;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+
+  <input type="file" id="fileInput">
+  
+  <div style="display: flex; margin-bottom: 20px;">
+    <button id="uploadButton">Prześlij plik</button>
+    <button id="viewListButton">Zobacz listę</button>
+  </div>
+
+  <div id="progressBar">
+    <div id="progress"></div>
+  </div>
+  
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script>
+    const firebaseConfig = {
+  apiKey: "AIzaSyCmeN5dEJC2HoqH9gBUKOCdRsQ43f-LS5s",
+  authDomain: "ggfiles-f19c9.firebaseapp.com",
+  projectId: "ggfiles-f19c9",
+  storageBucket: "ggfiles-f19c9.appspot.com",
+  messagingSenderId: "375002983794",
+  appId: "1:375002983794:web:714c035ffa0df9135541eb",
+  measurementId: "G-7RQYLVXMDF"
+};
+    firebase.initializeApp(firebaseConfig);
+
+    const storage = firebase.storage();
+    const storageRef = storage.ref();
+
+    const viewListButton = document.getElementById('viewListButton');
+    viewListButton.addEventListener('click', () => {
+      window.location.href = 'index2.html';
+    });
+
+    const fileInput = document.getElementById('fileInput');
+    const uploadButton = document.getElementById('uploadButton');
+    const progressBar = document.getElementById('progress');
+
+    uploadButton.addEventListener('click', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        const uploadTask = storageRef.child('files/' + file.name).put(file);
+
+        uploadTask.on('state_changed', (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          progressBar.style.width = progress + '%';
+        }, (error) => {
+          console.error('Wystąpił błąd podczas przesyłania: ', error);
+        }, () => {
+
+          console.log('Plik został pomyślnie przesłany!');
+          fileInput.value = ''; 
+          progressBar.style.width = '0'; 
+        });
+      } else {
+        console.error('Wybierz plik do przesłania!');
+      }
+    });
+  </script>
+</body>
+</html>
+

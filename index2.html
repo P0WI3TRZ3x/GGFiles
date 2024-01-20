@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GGFiles</title>
+  <style>
+  body{
+  background-color: black;
+  }
+    
+    #file-list {
+      list-style: none;
+      padding: 0;
+    }
+    #file-list li {
+      margin-bottom: 5px;
+    }
+    .download-btn {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <ul id="file-list"></ul>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script>
+    // Inicjalizacja Firebase
+   const firebaseConfig = {
+  apiKey: "AIzaSyCmeN5dEJC2HoqH9gBUKOCdRsQ43f-LS5s",
+  authDomain: "ggfiles-f19c9.firebaseapp.com",
+  projectId: "ggfiles-f19c9",
+  storageBucket: "ggfiles-f19c9.appspot.com",
+  messagingSenderId: "375002983794",
+  appId: "1:375002983794:web:714c035ffa0df9135541eb",
+  measurementId: "G-7RQYLVXMDF"
+};
+
+    firebase.initializeApp(firebaseConfig);
+
+    // Pobierz referencję do folderu w Storage
+    const storageRef = firebase.storage().ref('files');
+
+    // Pobierz listę plików z folderu
+    storageRef.listAll().then((res) => {
+      const fileList = document.getElementById('file-list');
+
+      res.items.forEach((itemRef) => {
+        const fileName = itemRef.name;
+
+        // Pobierz metadane pliku (rozmiar i data modyfikacji)
+        itemRef.getMetadata().then((metadata) => {
+          const fileSize = metadata.size;
+          const fileLastModified = metadata.updated;
+
+          // Pobierz URL do pobrania pliku
+          itemRef.getDownloadURL().then((fileURL) => {
+            // Dodaj link do pliku do listy na stronie
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = fileURL;
+            link.textContent = fileName + ' (Rozmiar: ' + fileSize + ' bajtów, Data modyfikacji: ' + fileLastModified + ')';
+            listItem.appendChild(link);
+
+            // Dodaj przycisk do pobierania
+            const downloadBtn = document.createElement('button');
+            downloadBtn.classList.add('download-btn');
+            downloadBtn.textContent = 'Pobierz';
+            downloadBtn.addEventListener('click', () => {
+              // Tworzenie bezpośredniego linku do pobrania pliku
+              const a = document.createElement('a');
+              a.href = fileURL;
+              a.download = fileName;
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            });
+            listItem.appendChild(downloadBtn);
+
+            fileList.appendChild(listItem);
+          }).catch((error) => {
+            console.error('Błąd podczas pobierania URL do pliku:', error);
+          });
+        }).catch((error) => {
+          console.error('Błąd podczas pobierania metadanych pliku:', error);
+        });
+      });
+    }).catch((error) => {
+      console.error('Błąd podczas pobierania listy plików:', error);
+    });
+  </script>
+</body>
+</html>
